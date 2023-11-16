@@ -32,8 +32,13 @@ class DocumentImageSerializer(serializers.ModelSerializer):
         model = DocumentImage
         fields = '__all__'
 
+class CustomUserssSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = '__all__'
+
 class DoctorListsSerializer(serializers.ModelSerializer):
-    user = CustomUserSerializer()
+    user = CustomUserssSerializer() 
     time_slots = TimeSlotSerializer(many=True, required=False)  # Include TimeSlot data
 
     class Meta:

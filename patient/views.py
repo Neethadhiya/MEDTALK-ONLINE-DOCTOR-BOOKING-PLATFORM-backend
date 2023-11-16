@@ -54,9 +54,7 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 class ShowDoctorList(APIView):
     def get(self, request):
         try:
-            # doctors =  Doctor.objects.filter(status='Approved',is_active=True)
-            doctors = Doctor.objects.filter(status='Approved',is_doctor_verified =True).prefetch_related('time_slots__times')
-            print(doctors,'99999999999999')
+            doctors = Doctor.objects.filter(status='Approved',is_doctor_verified =True, user__is_active=True).prefetch_related('time_slots__times')
             serializer = DoctorListsSerializer(doctors, many=True)
             response_data = {
                 'success': True,
@@ -71,7 +69,7 @@ class ShowDoctorsList(APIView):
     def get(self, request):
         try:
             # doctors =  Doctor.objects.filter(status='Approved',is_active=True)
-            doctors = Doctor.objects.filter(status='Approved',is_doctor_verified =True).prefetch_related('time_slots__times')
+            doctors = Doctor.objects.filter(status='Approved',is_doctor_verified =True, user__is_active=True).prefetch_related('time_slots__times')
             print(doctors,'--------------')
             serializer = DoctorListsSerializer(doctors, many=True)
             print(serializer.data,'kkkkkkkkkkkkk')
@@ -322,7 +320,7 @@ class ViewPatientPrescriptonView(APIView):
 class ViewPatientAppointmentView(APIView):
     def get(self, request):
         try:
-            appointment = DoctorAppointment.objects.filter(user=request.user.id)
+            appointment = DoctorAppointment.objects.filter(user=request.user.id).order_by('-created_at')
             appointment_serializer = PatientAppointmentSerializer(appointment, many=True)
             response_data = {
                 'success': True,
@@ -373,7 +371,8 @@ class SearchDoctorsList(APIView):
         doctors = Doctor.objects.filter(
             Q(specialization__icontains=search) | Q(city__icontains=search),
             status='Approved',
-            is_doctor_verified=True
+            is_doctor_verified=True,
+            user__is_active=True 
         )
         
         if not doctors.exists():
