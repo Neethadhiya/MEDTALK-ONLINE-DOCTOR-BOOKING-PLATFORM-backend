@@ -186,12 +186,12 @@ class RejectDoctor(APIView):
         doctor = Doctor.objects.get(user = user)
         doctor_user = doctor.user
         name = doctor_user.first_name
-        if doctor.is_doctor_verified == False and doctor_user.is_doctor == False:
-            response_data = {
-                        'error' : True,
-                        'message' : f"Dr. {name} has already been rejected",
-                    }        
-            return Response(response_data,status = 400) 
+        # if doctor.is_doctor_verified == False and doctor_user.is_doctor == False:
+        #     response_data = {
+        #                 'error' : True,
+        #                 'message' : f"Dr. {name} has already been rejected",
+        #             }        
+        #     return Response(response_data,status = 400) 
         try:
             doctor_user.is_doctor = False
             doctor.is_doctor_verified = False

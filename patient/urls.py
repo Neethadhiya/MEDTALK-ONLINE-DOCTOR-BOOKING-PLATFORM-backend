@@ -3,7 +3,7 @@ from . import views
 
 app_name = 'patient'
 urlpatterns = [
-    path('show_doctor_list/',views.ShowDoctorList.as_view(), name = 'show_doctor_list'),
+    path('show_doctors_list/',views.ShowDoctorsList.as_view(), name = 'show_doctors_list'),
     path('book_now_show_timeslot/<int:id>/',views.BookNowShowTimeslot.as_view(), name = 'book_now_show_timeslot'),
     path('get_timeslots/',views.GetTimeSlot.as_view(), name = 'get_timeslots'),
     path('book_appointment/',views.BookAppoinment.as_view(), name = 'book_appointment'),

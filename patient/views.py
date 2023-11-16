@@ -54,9 +54,27 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 class ShowDoctorList(APIView):
     def get(self, request):
         try:
-            doctors =  Doctor.objects.all()
-            doctors = Doctor.objects.all().prefetch_related('time_slots__times')
+            # doctors =  Doctor.objects.filter(status='Approved',is_active=True)
+            doctors = Doctor.objects.filter(status='Approved',is_doctor_verified =True).prefetch_related('time_slots__times')
+            print(doctors,'99999999999999')
             serializer = DoctorListsSerializer(doctors, many=True)
+            response_data = {
+                'success': True,
+                'doctors': serializer.data,
+            }
+            return Response(response_data, status=200)
+        
+        except Exception as e:
+            return Response({'success': False, 'error': str(e)}, status=500)
+
+class ShowDoctorsList(APIView):
+    def get(self, request):
+        try:
+            # doctors =  Doctor.objects.filter(status='Approved',is_active=True)
+            doctors = Doctor.objects.filter(status='Approved',is_doctor_verified =True).prefetch_related('time_slots__times')
+            print(doctors,'--------------')
+            serializer = DoctorListsSerializer(doctors, many=True)
+            print(serializer.data,'kkkkkkkkkkkkk')
             response_data = {
                 'success': True,
                 'doctors': serializer.data,
@@ -101,6 +119,7 @@ class BookNowShowTimeslot(APIView):
                 'first_name': doctor.user.first_name,
             }
         }
+        print(serializer.data,'jjjjjjjjjjjjjjj')
         response_data = {
             'success': True,
             'doctor': doctor_data,
@@ -352,7 +371,9 @@ class SearchDoctorsList(APIView):
         search = request.query_params.get('search', '').strip()
         
         doctors = Doctor.objects.filter(
-            Q(specialization__icontains=search) | Q(city__icontains=search)
+            Q(specialization__icontains=search) | Q(city__icontains=search),
+            status='Approved',
+            is_doctor_verified=True
         )
         
         if not doctors.exists():
