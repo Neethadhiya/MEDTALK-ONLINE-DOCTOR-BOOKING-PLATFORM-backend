@@ -192,7 +192,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #     "http://localhost:5173",
 # ]
 CORS_ALLOWED_ORIGINS = [
-    "https://medtalkonline.netlify.app/"
+    "https://medtalkonline.netlify.app"
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 
