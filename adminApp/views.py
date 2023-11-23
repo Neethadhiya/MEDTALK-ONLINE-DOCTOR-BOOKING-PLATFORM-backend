@@ -27,7 +27,9 @@ class ShowDoctorList(APIView):
     def get(self, request):
         try:
             doctors =  Doctor.objects.all()
+            print(doctors,'11111111111111')
             serializer = DoctorListSerializer(doctors, many = True)
+            print(serializer.data,'ddddddddddddddddddddd')
             response_data = {
                 'success': True,
                 'doctors': serializer.data,

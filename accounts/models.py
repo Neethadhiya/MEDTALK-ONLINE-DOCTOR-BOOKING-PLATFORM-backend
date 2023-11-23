@@ -148,46 +148,26 @@ class Medicine(models.Model):
     def __str__(self):
         return self.medicine_name
 
-         
-# class Patient(models.Model):
-#     BLOOD_GROUPS = (
-#         ('A+', 'A+'),
-#         ('A-', 'A-'),
-#         ('B+', 'B+'),
-#         ('B-', 'B-'),
-#         ('AB+', 'AB+'),
-#         ('AB-', 'AB-'),
-#         ('O+', 'O+'),
-#         ('O-', 'O-'),
-#     )
-#     LANGUAGE_CHOICES = (
-#         ('english', 'English'),
-#         ('spanish', 'Spanish'),
-#         ('french', 'French'),
-#         ('hindi','Hindi'),
-#         ('malayalam','Malayalam')
-#     )
-#     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-#     date_of_birth = models.DateField()
-#     gender = models.CharField(max_length=10, choices=(('male', 'Male'), ('female', 'Female'), ('other', 'Other')))
-#     blood_group = models.CharField(max_length=3, choices=BLOOD_GROUPS)
-#     language = models.CharField(max_length=255,choices=LANGUAGE_CHOICES)
-#     image = models.CharField(max_length=255)
-#     created_at = models.DateTimeField(default=timezone.now, editable=False)
-#     modified_at = models.DateTimeField(auto_now=True, editable=False)
-#     email_token = models.CharField(max_length=250, null=True)
-#     is_verified = models.BooleanField(default=False)
-#     is_patient =  models.BooleanField(default=False)
-#     def __str__(self):
-#         return self.user.first_name
-
 class Admin(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
 
-# class Specialization(models.Model):
-#     name = models.CharField(max_length=255)
-#     created_at = models.DateTimeField(default=timezone.now, editable=False)
-#     modified_at = models.DateTimeField(auto_now=True, editable=False)
-#     def __str__(self):
-#         return self.name
+class Wallet(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="wallet")
+    amount = models.FloatField(default=0)
+
+    def __str__(self):
+        return f"Wallet of the {self.user.first_name}"
+
+class DoctorFees(models.Model):
+    doctor = models.OneToOneField(Doctor, on_delete=models.CASCADE, related_name='doctor_fees')
+    total_doctor_fees = models.FloatField(default=0)
+    total_admin_fees = models.FloatField(default=0)
+
+    def __str__(self):
+        return f"Total fees for {self.doctor.name}"
+
+
+
+
+
 

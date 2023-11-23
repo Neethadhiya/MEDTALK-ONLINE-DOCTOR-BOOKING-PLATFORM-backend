@@ -93,6 +93,64 @@ class ShowIsDoctor(APIView):
                 }
         return Response(response_data, status=200)
 
+# class TimeslotVideoConsult(APIView):
+#     def post(self,request):
+#         if not request.data:
+#             response_data = {
+#                 'error': True,
+#                 'message': ' No data is provided',
+#             }
+#             return Response(response_data, status = status.HTTP_400_BAD_REQUEST) 
+#         doctor = request.user.doctor_profile
+#         date_str = request.data.get('date', '')
+#         times_str = request.data.get('time', '').split(',')
+#         print
+#         date_obj = datetime.strptime(date_str, '%a %b %d %Y %H:%M:%S GMT%z (%Z)')
+#         month = date_obj.strftime('%B')
+#         day = date_obj.strftime('%A')
+#         formatted_date = date_obj.strftime('%Y-%m-%d')
+#         if TimeSlot.objects.filter(date=formatted_date,doctor=doctor).exists():
+#             response_data = {
+#                     'error': True,
+#                     'message': 'Timeslot already added for this date'
+#                 }
+#             return Response(response_data, status=400)
+#         time_slot_data = {
+#             'doctor' : doctor.id,
+#             'date' : formatted_date,
+#             'month' : month,
+#             'day' : day,
+          
+#         }
+#         time_slot_serializer = TimeSlotSerializer(data=time_slot_data)
+#         if time_slot_serializer.is_valid():
+#             time_slot = time_slot_serializer.save()
+#             times_data = [{'time': time, 'timeslot': time_slot.id} for time in times_str]
+
+#             time_serializer = TimeSerializer(data=times_data, many=True)
+#             if time_serializer.is_valid():
+#                 time_serializer.save()
+#                 response_data = {
+#                     'success': True,
+#                     'timeslots': time_slot_serializer.data,
+#                     'message': 'Time slots created successfully',
+#                 }
+#                 return Response(response_data, status=status.HTTP_201_CREATED)
+#             else:
+#                 response_data = {
+#                     'error': True,
+#                     'message': 'Error failed',
+#                     'details': time_serializer.errors,
+#                 }
+#                 return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+#         else:
+#             response_data = {
+#                 'error': True,
+#                 'message': 'TimeSlot validation failed',
+#                 'details': time_slot_serializer.errors,
+#             }
+#             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+
 class TimeslotVideoConsult(APIView):
     def post(self,request):
         if not request.data:
@@ -149,7 +207,7 @@ class TimeslotVideoConsult(APIView):
                 'details': time_slot_serializer.errors,
             }
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
-        
+
 class VideoViewAll(APIView):
     def get(self,request):
         doctor = Doctor.objects.get(user = request.user)      

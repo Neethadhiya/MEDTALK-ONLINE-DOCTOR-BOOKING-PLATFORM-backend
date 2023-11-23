@@ -15,4 +15,5 @@ urlpatterns = [
     path('view_patient_appointment_details/', views.ViewPatientAppointmentView.as_view(), name='view_patient_appointment_details'),
     path('view_patient_profile_dashboard/', views.PatientProfileView.as_view(), name='view_patient_profile_dashboard'), 
     path('search_doctors/', views.SearchDoctorsList.as_view(), name='search_doctors'),
+    path('user_cancel_appointment/' ,views.UserCancelAppointment.as_view(), name= 'user_cancel_appointment'),
   ]

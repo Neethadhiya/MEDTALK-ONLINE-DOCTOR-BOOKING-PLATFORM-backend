@@ -206,7 +206,7 @@ CORS_ALLOW_METHODS = (
 )
 CORS_ALLOW_CREDENTIALS = True
 AUTH_USER_MODEL = 'accounts.CustomUser'
-
+TIME_ZONE = 'Asia/Kolkata'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'

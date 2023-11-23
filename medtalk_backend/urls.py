@@ -8,10 +8,6 @@ from django.conf import settings
 urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),   
-    # path('accounts/', include('accounts.urls', namespace='accounts')),
-    # path('doctor/', include('doctor.urls', namespace='doctor')),
-    # path('admin/', include('adminApp.urls', namespace='adminApp')),
-    # path('patient/', include('patient.urls', namespace='patient')),
     path('accounts/', include('accounts.urls')),
     path('doctor/', include('doctor.urls')),
     path('admin/', include('adminApp.urls')),

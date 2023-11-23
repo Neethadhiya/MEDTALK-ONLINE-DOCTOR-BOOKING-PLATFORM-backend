@@ -23,7 +23,10 @@ from accounts.models import (
     DoctorAppointment,
     Payment,
     Prescription,
-    Medicine)
+    Medicine,
+    Wallet,
+    DoctorFees,
+    )
 from rest_framework.exceptions import AuthenticationFailed
 import jwt,datetime
 import uuid
@@ -68,11 +71,8 @@ class ShowDoctorList(APIView):
 class ShowDoctorsList(APIView):
     def get(self, request):
         try:
-            # doctors =  Doctor.objects.filter(status='Approved',is_active=True)
             doctors = Doctor.objects.filter(status='Approved',is_doctor_verified =True, user__is_active=True).prefetch_related('time_slots__times')
-            print(doctors,'--------------')
             serializer = DoctorListsSerializer(doctors, many=True)
-            print(serializer.data,'kkkkkkkkkkkkk')
             response_data = {
                 'success': True,
                 'doctors': serializer.data,
@@ -117,7 +117,6 @@ class BookNowShowTimeslot(APIView):
                 'first_name': doctor.user.first_name,
             }
         }
-        print(serializer.data,'jjjjjjjjjjjjjjj')
         response_data = {
             'success': True,
             'doctor': doctor_data,
@@ -165,32 +164,33 @@ class BookAppoinment(APIView):
         comments = request.data.get('comments')
         timeslot_id = request.data.get('timeslot_id')
         consultation_value = request.data.get('consultation_value')
-        print(consultation_value,'kkkkkkkkkkkkkkkkkk')
         doctor = Doctor.objects.get(id=doctorId)
         if consultation_value=='Video':
             fee = doctor.online_fees
             consultation_mode = 'Video Call'
             admin_fees = (fee*10)/100
             doctor_fees = fee-admin_fees
-
-        # elif consultation_value=='Chat':
-        #     doctor_fees = doctor.chat_fees
-        #     consultation_mode = 'Chat'
         times = Time.objects.get(id=time_id)
         selected_time = times.time
+        
         existing_appointment = DoctorAppointment.objects.filter(
             user = user,
             selected_date = selected_date,
             doctor = doctor,
             time = selected_time,
-        )
+        ).exclude(status='Canceled')
         if existing_appointment:
             response_data = {
                 'error': True,
                 'message': 'An appointment with the same criteria already exists.',
             }
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
-        
+        doctor_fees_instance, created = DoctorFees.objects.get_or_create(doctor=doctor)
+        print(doctor_fees,'doctor_fees')
+        print(admin_fees,'admin_fees')
+        doctor_fees_instance.total_doctor_fees += doctor_fees
+        doctor_fees_instance.total_admin_fees += admin_fees  # Adding admin fees to DoctorFees
+        doctor_fees_instance.save()
         appointment = DoctorAppointment(
             user = user,
             selected_date = selected_date,
@@ -380,3 +380,89 @@ class SearchDoctorsList(APIView):
         
         serializer = DoctorFindSerializer(doctors, many=True)
         return Response({'data': serializer.data})
+    
+class UserCancelAppointment(APIView):
+    def delete(self, request):
+        appointment_id = request.data.get('id')
+        try:
+            appointment = DoctorAppointment.objects.get(id=appointment_id)
+            if appointment.status == 'Canceled':
+                response_data = {
+                'error': True,
+                'message': 'Appointment already canceled.',
+                }
+                return Response(response_data, status=status.HTTP_404_NOT_FOUND)
+            today_date = timezone.now().date()
+            current_time = timezone.now().time()
+            appointment_time_str = appointment.time
+            appointment_datetime = datetime.strptime(appointment_time_str, '%I.%M %p').time()
+            if appointment.selected_date < today_date:
+                response_data = {
+                    'error': True,
+                    'message': 'Appointment has already occurred. Cannot cancel.',
+                }
+                return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+            time_difference = datetime.combine(today_date, appointment_datetime) - datetime.combine(today_date, current_time)
+            print("Appointment Selected Date:", appointment.selected_date)
+            print("Today's Date:", today_date)
+            print("Current Time:", current_time)
+            print("Appointment Time:", appointment_datetime)
+            print("Time Difference:", time_difference)
+            if time_difference <= timedelta(hours=1):
+                response_data = {
+                    'error': True,
+                    'message': 'Appointment cancellation period has expired. Cannot cancel now.',
+                }
+                return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+            payment_amount = appointment.fees
+            doctor_refund = (payment_amount * 90) / 100
+            admin_refund = (payment_amount * 10) / 100
+
+            # Adjust fees in the appointment
+            appointment.status = 'Canceled'  # Update appointment status
+            appointment.payment_status = False
+            appointment.save()
+            user = appointment.user
+            try:
+                user_wallet = Wallet.objects.get(user=user)
+            except Wallet.DoesNotExist:
+                user_wallet = Wallet.objects.create(user=user)
+            
+            user_wallet.amount += doctor_refund  # Refund 90% to user's wallet
+            user_wallet.save()
+
+            doctor = appointment.doctor
+
+            doctor_fees_instance = DoctorFees.objects.get(doctor=doctor)
+            doctor_fees_instance.total_doctor_fees -= doctor_refund
+            doctor_fees_instance.total_admin_fees -= admin_refund
+            doctor_fees_instance.save()
+
+            doctor_fees_instance.total_doctor_fees += (payment_amount * 5) / 100
+            doctor_fees_instance.total_admin_fees += (payment_amount * 5) / 100
+            doctor_fees_instance.save()
+
+            timeslot = TimeSlot.objects.filter(doctor=appointment.doctor, date=appointment.selected_date).first()
+            if timeslot:
+                with transaction.atomic():
+                    # Create a new Time entry with the canceled time for the TimeSlot
+                    canceled_time = appointment.time
+                    Time.objects.create(timeslot=timeslot, time=canceled_time)
+                       
+            response_data = {
+                'success': True,
+                'message': 'Appointment canceled successfully.',
+            }
+            return Response(response_data, status=status.HTTP_200_OK)
+
+        except DoctorAppointment.DoesNotExist:
+            response_data = {
+                'error': True,
+                'message': 'Appointment does not exist.',
+                }
+            return Response(response_data, status=status.HTTP_404_NOT_FOUND)
+                
+    
+            
+
+
