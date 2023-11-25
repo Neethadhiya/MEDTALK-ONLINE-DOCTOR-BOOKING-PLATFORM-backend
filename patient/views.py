@@ -523,12 +523,11 @@ class ShowWalletBalance(APIView):
     def get(self, request):
         try:
             wallet = Wallet.objects.get(user=request.user)
-            print(wallet.amount, 'kkkkkkkkkkkkkkkkkk')
-
+            rounded_amount = round(wallet.amount, 2)
             response_data = {
                 'success': True,
                 'message': 'Wallet balance retrieved successfully.',
-                'balance': wallet.amount  # Include the wallet balance in the response
+                'balance': rounded_amount  # Include the wallet balance in the response
             }
             return Response(response_data, status=status.HTTP_200_OK)
 

@@ -486,6 +486,7 @@ class GetDoctorChartView(APIView):
             ).order_by('selected_date__year', 'selected_date__month')
             doctor_fees_instance = DoctorFees.objects.get(doctor=doctor_instance)
             total_doctor_fees = doctor_fees_instance.total_doctor_fees
+            rounded_amount = round(total_doctor_fees, 2)
             # Prepare the data for the chart
             months = []
             doctor_fees = []
@@ -500,7 +501,7 @@ class GetDoctorChartView(APIView):
             "doctor_fees": doctor_fees,
             "appointment_count": appointment_count,
             'message': 'An error occured',
-            'total_doctor_fees' : total_doctor_fees,
+            'total_doctor_fees' : rounded_amount,
         }
             return Response(response_data, status=status.HTTP_200_OK)
         
