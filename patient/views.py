@@ -277,7 +277,7 @@ class PaymentSuccess(APIView):
                 stripe_id=stripe_id,
                 appointment=appointment
             )
-            
+
             response_data = {
                 'success': True,
                 'message': 'Payment added successfully',
@@ -391,6 +391,17 @@ class UserCancelAppointment(APIView):
                 'message': 'Appointment already canceled.',
                 }
                 return Response(response_data, status=status.HTTP_404_NOT_FOUND)
+            try:
+                prescription = Prescription.objects.get(appointment=appointment)
+                response_data = {
+                    'error': True,
+                    'message': 'Appointment already completed.',
+                }
+                return Response(response_data, status=status.HTTP_404_NOT_FOUND)
+            except Prescription.DoesNotExist:
+                pass 
+
+
             today_date = timezone.now().date()
             current_time = timezone.now().time()
             appointment_time_str = appointment.time

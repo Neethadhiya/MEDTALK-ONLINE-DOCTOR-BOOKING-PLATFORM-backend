@@ -315,6 +315,8 @@ class TodaysChatConsult(APIView):
 class SendVideoCallLinkToPatient(APIView):
     def post(self, request, id):
         appointment = DoctorAppointment.objects.get(id=id)
+        appointment.status = 'Completed'
+        appointment.save()
         patient_email = appointment.user.email
         patient_mobile = "+91" + appointment.user.mobile
         doctor = appointment.doctor.user.first_name
