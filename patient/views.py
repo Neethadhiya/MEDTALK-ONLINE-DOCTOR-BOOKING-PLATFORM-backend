@@ -491,7 +491,7 @@ class WalletPayment(APIView):
                 )
                 response_data = {
                     'success': True,
-                    'message': 'Payment successful. Amount deducted from wallet.',
+                    'message': 'Appointment Confirmed... Amount deducted from wallet.',
                 }
                 return Response(response_data, status=status.HTTP_200_OK)
             else:
