@@ -22,6 +22,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError
 from accounts.send_otp_to_email import approve_doctor_send_mail, reject_doctor_send_mail
 from django.db.models import Sum
+from accounts.models import DoctorFees
 
 class ShowDoctorList(APIView):
     def get(self, request):
@@ -219,6 +220,8 @@ class RejectDoctor(APIView):
 class GetAdminChart(APIView):
     def get(self, request):
         try:
+            appointment_count = DoctorAppointment.objects.all().count()
+            
             # Query doctor's monthly income data
             monthly_income_data = DoctorAppointment.objects.filter(
                 payment_status=True
@@ -240,6 +243,8 @@ class GetAdminChart(APIView):
             "months": months,
             "admin_fees": admin_fees,
             'message': 'An error occured',
+            'appointment_count':appointment_count,
+
         }
             return Response(response_data, status=status.HTTP_200_OK)
         

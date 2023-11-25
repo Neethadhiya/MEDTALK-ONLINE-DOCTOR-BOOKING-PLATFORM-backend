@@ -26,7 +26,8 @@ from accounts.models import (
     TimeSlot, 
     DoctorAppointment,
     Prescription,
-    Medicine)
+    Medicine,
+    DoctorFees)
 from rest_framework.exceptions import AuthenticationFailed
 import jwt,datetime
 import uuid
@@ -473,6 +474,7 @@ class GetDoctorChartView(APIView):
             )
 
         try:
+            appointment_count = DoctorAppointment.objects.filter(doctor=doctor_instance).count()
             # Query doctor's monthly income data
             monthly_income_data = DoctorAppointment.objects.filter(
                 doctor=doctor_instance,
@@ -480,22 +482,23 @@ class GetDoctorChartView(APIView):
             ).values('selected_date__year', 'selected_date__month').annotate(
                 monthly_income=Sum('doctor_fees')
             ).order_by('selected_date__year', 'selected_date__month')
-            
+            doctor_fees_instance = DoctorFees.objects.get(doctor=doctor_instance)
+            total_doctor_fees = doctor_fees_instance.total_doctor_fees
             # Prepare the data for the chart
             months = []
             doctor_fees = []
-
             for entry in monthly_income_data:
                 # Create a formatted month string (e.g., '2023-10')
                 month_str = f"{entry['selected_date__year']}-{entry['selected_date__month']:02}"
                 months.append(month_str)
                 doctor_fees.append(entry['monthly_income'])
-
             response_data = {
             'success': True,
             "months": months,
             "doctor_fees": doctor_fees,
+            "appointment_count": appointment_count,
             'message': 'An error occured',
+            'total_doctor_fees' : total_doctor_fees,
         }
             return Response(response_data, status=status.HTTP_200_OK)
         

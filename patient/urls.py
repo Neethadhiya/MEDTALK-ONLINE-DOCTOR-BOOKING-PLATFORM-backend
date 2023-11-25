@@ -16,4 +16,7 @@ urlpatterns = [
     path('view_patient_profile_dashboard/', views.PatientProfileView.as_view(), name='view_patient_profile_dashboard'), 
     path('search_doctors/', views.SearchDoctorsList.as_view(), name='search_doctors'),
     path('user_cancel_appointment/' ,views.UserCancelAppointment.as_view(), name= 'user_cancel_appointment'),
+    path('wallet_payment/<int:id>/' ,views.WalletPayment.as_view(), name= 'wallet_payment'),
+    path('show_wallet_balance/' ,views.ShowWalletBalance.as_view(), name= 'show_wallet_balance'),
+
   ]

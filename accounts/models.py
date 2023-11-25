@@ -126,7 +126,7 @@ class DoctorAppointment(models.Model):
         return f"Appointment for {self.user.first_name} with doctor ID {self.doctor_id} on {self.selected_date}"
 
 class Payment(models.Model):
-    stripe_id = models.CharField(max_length=100)
+    stripe_id = models.CharField(max_length=100,null=True)
     appointment = models.OneToOneField(DoctorAppointment, on_delete=models.CASCADE, related_name='payment', null=True)
     payment_method = models.CharField(max_length=100, default='Stripe Payment')
 

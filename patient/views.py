@@ -186,8 +186,6 @@ class BookAppoinment(APIView):
             }
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
         doctor_fees_instance, created = DoctorFees.objects.get_or_create(doctor=doctor)
-        print(doctor_fees,'doctor_fees')
-        print(admin_fees,'admin_fees')
         doctor_fees_instance.total_doctor_fees += doctor_fees
         doctor_fees_instance.total_admin_fees += admin_fees  # Adding admin fees to DoctorFees
         doctor_fees_instance.save()
@@ -279,6 +277,7 @@ class PaymentSuccess(APIView):
                 stripe_id=stripe_id,
                 appointment=appointment
             )
+            
             response_data = {
                 'success': True,
                 'message': 'Payment added successfully',
@@ -461,8 +460,72 @@ class UserCancelAppointment(APIView):
                 'message': 'Appointment does not exist.',
                 }
             return Response(response_data, status=status.HTTP_404_NOT_FOUND)
-                
+
+class WalletPayment(APIView):
+    def post(self, request, id):
+        try:
+            appointment = DoctorAppointment.objects.get(id=id)
+            user = appointment.user
+            fees = appointment.fees
+            wallet = Wallet.objects.get(user=user)
+
+            if fees <= wallet.amount:
+                wallet.amount -= fees
+                wallet.save()
+                appointment.payment_status = True
+                appointment.save()
+                Payment.objects.create(
+                payment_method = 'Wallet Payment',
+                appointment=appointment
+                )
+                response_data = {
+                    'success': True,
+                    'message': 'Payment successful. Amount deducted from wallet.',
+                }
+                return Response(response_data, status=status.HTTP_200_OK)
+            else:
+                response_data = {
+                    'error': True,
+                    'message': 'Payment failed. Insufficient balance in wallet.',
+                }
+                return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+
+        except DoctorAppointment.DoesNotExist:
+            response_data = {
+                    'error': True,
+                    'message': 'Appointment does not exist.',
+                }
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+
+        except Wallet.DoesNotExist:
+            response_data = {
+                    'error': True,
+                    'message': 'Wallet not found for this user.',
+                }
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            # Catch any other unexpected errors
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-            
+class ShowWalletBalance(APIView):
+    def get(self, request):
+        try:
+            wallet = Wallet.objects.get(user=request.user)
+            print(wallet.amount, 'kkkkkkkkkkkkkkkkkk')
 
+            response_data = {
+                'success': True,
+                'message': 'Wallet balance retrieved successfully.',
+                'balance': wallet.amount  # Include the wallet balance in the response
+            }
+            return Response(response_data, status=status.HTTP_200_OK)
 
+        except Wallet.DoesNotExist:
+            # Handle the case when the wallet for the user does not exist
+            raise NotFound("Wallet not found for this user")
+
+        except Exception as e:
+            # Catch any other unexpected errors
+            print("An error occurred:", e)
+            return Response({'error': 'An error occurred while fetching the wallet.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
