@@ -2,7 +2,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 
 def send_otp_to_email(email, otp):
-    email = 'neethadhiya@gmail.com'
+    # email = 'neethadhiya@gmail.com'
     subject = 'Verify your MEDTALK account'
     message = f'MEDTALK account verification OTP is {otp}'
     email_from = settings.EMAIL_HOST_USER
@@ -12,8 +12,8 @@ def send_otp_to_email(email, otp):
 
 
 def reset_password_send_email(token,email):
-    print("pppppppppppppppppppppppp")
-    email = 'neethadhiya@gmail.com'
+    # print("pppppppppppppppppppppppp")
+    # email = 'neethadhiya@gmail.com'
     subject = 'Reset your MEDTALK account password'
     message = f'Please click the link to reset your password http://localhost:5173/reset_password/{token}/'
     email_from = settings.EMAIL_HOST_USER
@@ -22,7 +22,7 @@ def reset_password_send_email(token,email):
     return True
 
 def approve_doctor_send_mail(email, name):
-    email = 'neethadhiya@gmail.com'
+    # email = 'neethadhiya@gmail.com'
     subject = 'Congratulations!!!MedTalk Doctor Approval'
     message = f'Dear Dr. {name},\n\n' \
               'We are pleased to inform you that you have been officially approved as a doctor on MedTalk.\n\n' \
@@ -45,7 +45,7 @@ def approve_doctor_send_mail(email, name):
     return True
 
 def reject_doctor_send_mail(email, name):
-    email = 'neethadhiya@gmail.com'
+    # email = 'neethadhiya@gmail.com'
     subject = 'MedTalk Doctor Approval Notification'
     message = f'Dear Dr. {name},\n\n' \
               'We appreciate your interest in joining MedTalk as a certified doctor.\n\n' \
@@ -63,7 +63,7 @@ def reject_doctor_send_mail(email, name):
     return True   
 
 def send_videocall_link_send_email(video_call_link, patient_email, doctor):
-    patient_email = 'neethadhiya@gmail.com'
+    # patient_email = 'neethadhiya@gmail.com'
     subject = 'Join a MedTalk video call with Dr. ' + doctor
     message = f'Hello,\n\nYou can now join a video call with Dr. {doctor}.\n\nPlease click the link below to join the call:\n\n{video_call_link}\n\nBest regards,\nMedTalk Team'
     email_from = settings.EMAIL_HOST_USER
